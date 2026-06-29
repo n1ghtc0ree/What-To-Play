@@ -17,6 +17,12 @@ export function displayGames(games, duration = null, currentLang = "en") {
     const Image = `https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg`;
     const genres = game.genres || "Unknown Genre";
     const genresList = typeof genres === "string" ? genres.split(",") : genres;
+    
+    // Skip games with missing essential data
+    if (!game.name || game.name === "Unknown Game" || !game.appid) {
+      console.warn(`Skipping invalid game: ${JSON.stringify(game)}`);
+      return;
+    }
 
     let filteredGenres = genresList;
     if (duration && timeGenres[duration]) {

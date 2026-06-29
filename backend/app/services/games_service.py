@@ -248,14 +248,14 @@ class GameService:
                     game_info = self.get_game_info_by_id(appid)
                     
                     # If Steam API fails, use existing data from user library
-                    if game_info and not isinstance(game_info, list):
+                    if game_info and not isinstance(game_info, list) and game_info.name and game_info.name != "Unknown":
                         result.append(game_info)
                         self.logger.info(f"Used Steam API data for {appid}")
                     else:
                         # Use existing data from user library
                         self.logger.warning(f"Steam API failed for {appid}, using existing library data")
                         library_game = next((g for g in user_libary if g.appid == appid), None)
-                        if library_game:
+                        if library_game and library_game.name and library_game.name != "Unknown":
                             result.append(GameFetched(
                                 appid=library_game.appid,
                                 name=library_game.name,
@@ -268,7 +268,7 @@ class GameService:
                             ))
                             self.logger.info(f"Used library data for {appid}: {library_game.name}")
                         else:
-                            self.logger.error(f"Game {appid} not found in library either")
+                            self.logger.error(f"Game {appid} not found in library either or has invalid data")
 
             return result
 
