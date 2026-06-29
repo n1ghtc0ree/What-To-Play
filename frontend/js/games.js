@@ -17,6 +17,12 @@ export function displayGames(games, duration = null, currentLang = "en") {
     const Image = `https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg`;
     const genres = game.genres || "Unknown Genre";
     const genresList = typeof genres === "string" ? genres.split(",") : genres;
+    
+    // Skip games with missing essential data
+    if (!game.name || game.name === "Unknown Game" || !game.appid) {
+      console.warn(`Skipping invalid game: ${JSON.stringify(game)}`);
+      return;
+    }
 
     let filteredGenres = genresList;
     if (duration && timeGenres[duration]) {
@@ -129,18 +135,24 @@ export function findGames(userState, currentLang) {
     isUserLibrary: isUserLibrary
   });
 
-  const seenGames = localStorage.getItem("seenGames")?.split(",") || [];
+  let seenGames = (localStorage.getItem("seenGames")?.split(",") || []).filter(id => id && id.trim());
+
+  // Keep only last 50 seen games to prevent overfiltering
+  if (seenGames.length > 50) {
+    seenGames = seenGames.slice(-50);
+    localStorage.setItem("seenGames", seenGames.join(","));
+  }
 
   const payload = {
     vibe: vibeToSend,
-    time_perf: duration,
+    time_pref: duration,
     player_counts: players,
     is_user_library: isUserLibrary,
     user_library: userLibrary,
     seen_games: seenGames
   };
 
-  fetch("/games/filters", {
+  fetch("https://what-to-play.onrender.com/games/filters", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -171,6 +183,17 @@ export function findGames(userState, currentLang) {
       const gamesToShow = games.slice(0, 3);
 
       displayGames(gamesToShow, duration, currentLang);
+
+      // Smooth scroll to game results after a short delay
+      setTimeout(() => {
+        const gameResult = document.getElementById("gameResult");
+        if (gameResult) {
+          gameResult.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+          });
+        }
+      }, 300);
     })
     .catch((error) => {
       console.error("Error fetching games:", error);
@@ -193,7 +216,7 @@ export function dontCare(currentLang) {
   });
 
   if (hasLibrary) {
-    fetch("/random/library", {
+    fetch("https://what-to-play.onrender.com/random/library", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -251,7 +274,7 @@ export function dontCare(currentLang) {
         showErrorPopup(translations[currentLang]["server-error"], currentLang);
       });
   } else {
-    fetch("/random")
+    fetch("https://what-to-play.onrender.com/random")
       .then((r) => r.json())
       .then((data) => {
         const game = data.game || {};

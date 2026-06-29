@@ -81,8 +81,8 @@ export function fetchSteamLibrary(currentLang) {
 
   const url =
     actualInputType === "id"
-      ? `/owned-games/enriched/id/${inputValue}`
-      : `/owned-games/enriched/vanity/${inputValue}`;
+      ? `https://what-to-play.onrender.com/owned-games/enriched/id/${inputValue}`
+      : `https://what-to-play.onrender.com/owned-games/enriched/vanity/${inputValue}`;
 
   fetch(url)
     .then((r) => r.json())

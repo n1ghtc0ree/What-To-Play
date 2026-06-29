@@ -36,10 +36,6 @@ app.add_middleware(LoggingMiddleware)
 app.include_router(games_router)
 app.include_router(steam_router)
 
-# Mount frontend as static files
-frontend_path = Path(__file__).parent.parent.parent / "frontend"
-app.mount("/", StaticFiles(directory=str(frontend_path), html=True), name="frontend")
-
 @app.get("/api/health")
 def health():
     """Health check endpoint"""
