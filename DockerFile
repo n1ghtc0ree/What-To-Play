@@ -10,6 +10,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy backend only
 COPY backend/app ./app
 
+# Copy requirements to root for Render compatibility
+COPY backend/app/requirements.txt ./requirements.txt
+
 # Set environment variables
 ENV DB_PATH=/app/app.db
 
